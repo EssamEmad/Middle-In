@@ -1,7 +1,8 @@
-from huffman.huffman_node import HuffmanNode
+from huffman_node import HuffmanNode
 from heapq import heappop, heappush
-from huffman.binary_io import BinaryWriter
-
+from binary_io import BinaryWriter
+import binascii
+import struct
 def build_freq_dict(filename):
     """
     calculates freq of each character in a file and store the result in a
@@ -67,9 +68,17 @@ def build_huffman_tree(heap, freq):
         z = HuffmanNode(None, x.freq + y.freq, x, y) if y else x
         heappush(heap, z)
     return heappop(heap)
+def asciiBinary(self, character):
+    return "{0:b}".format(ord(character))
+def strFromAsciibinaryStr(self,ascii):
+    return chr(int(ascii, '2'))
 
+def treeHeight(node):
+    if(node is None or not(node.is_internal())):
+        return 0
+    return 1 + max(treeHeight(node.left), treeHeight(node.right))
 if __name__ == '__main__':
-    file_name = './sample'
+    file_name = 'huffman/sample'
 
     # to keep freq of each character in the input file
     # read input file and calculate freq
@@ -85,14 +94,37 @@ if __name__ == '__main__':
     # get variable length code for each character
     code_map = get_code_map(root)
 
-    # TODO: print the header to the compressed file
-
+    # Format of header:
+    #12 binary bits for length of header, 16 bits for length of each entry then
+    # length of header entries each of length length of entry
+    headerlength = len(freq) #number of leaves
+    assert headerlength < 1024
+    # header_entry_length = 8 + treeHeight(root) #8 bits for ascii char, then max length of tree
+    #not handling the case where length is greater than 4 bytes
     # print the code representation for each character to the compressed file
-    # TODO: improve this print - python binary print is terrible
     with open(file_name + ".zipy", "wb") as output_file, open(file_name, "r") as input_file:
-        bw = BinaryWriter(output_file, 8)
+        bw = BinaryWriter(output_file)
+        # bw.append(char != '0')
+        header_length_bin = "{0:012b}".format(headerlength)
+        print("COMPRESSIon HEADER LENGTH: {}, binary:{}".format(headerlength,header_length_bin))
+
+        # entry_length_bin = "{0:016b}".format(header_entry_length)
+        for char in header_length_bin:
+            bw.append(char != '0')
+        #print header itself
+        for key,value in code_map.items():
+            for char in "{0:04b}".format(len(value)) + "{0:08b}".format(ord(key)) +value:
+                bw.append(char != '0')
         for line in input_file:
             for c in line:
                 for digit in code_map[c]:
-                    bw.write(digit != '0')
-
+                    bw.append(digit != '0')
+        bw.write()
+        bw.close()
+        # file_name = 'huffman/sample.zipy'
+        # with open(file_name ,"rb") as f:
+        #     compressed = f.read()
+        #     print("All: {}".format(compressed))
+        #     print("Compresiados: {}".format("{0:08b}".format(compressed[1])))
+            # bytearray = bytearray(compressed)
+            # print(bytearray)
