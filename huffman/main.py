@@ -1,11 +1,10 @@
 from huffman_node import HuffmanNode
 from heapq import heappop, heappush
 from binary_io import BinaryWriter
-import binascii
-import struct
 import argparse
 
-def build_freq_dict(filename):
+
+def build_freq_dict(filename, is_binary=False):
     """
     calculates freq of each character in a file and store the result in a
     dictionary
@@ -13,10 +12,27 @@ def build_freq_dict(filename):
     :return: freq dictionary (character: freq)
     """
     freq = {}
-    with open(filename, "r") as f:
-        for line in f:
-            for c in line:
-                freq[c] = freq[c] + 1 if c in freq else 1
+
+    mode = "rb" if is_binary else "r"
+
+    with open(filename, mode) as f:
+        if is_binary:
+            try:
+                byte = f.read(1)
+                while byte != b'':
+                    # temp = byte
+                    # byte = f.read(1)
+                    # byte = temp + byte
+                    byte = int.from_bytes(byte, byteorder="big")
+                    freq[byte] = freq[byte] + 1 if byte in freq else 1
+                    print(byte)
+                    byte = f.read(1)
+            finally:
+                pass
+        else:
+            for line in f:
+                for c in line:
+                    freq[c] = freq[c] + 1 if c in freq else 1
     return freq
 
 
@@ -91,6 +107,16 @@ def print_compressed(input_file, code_map, is_binary=False):
             for c in line:
                 for digit in code_map[c]:
                     bw.append(digit != '0')
+    else:
+        try:
+            byte = input_file.read(1)
+            while byte != b'':
+                byte = int.from_bytes(byte, byteorder="big")
+                for digit in code_map[byte]:
+                    bw.append(digit != '0')
+                byte = input_file.read(1)
+        finally:
+            pass
 
 if __name__ == '__main__':
 
@@ -108,7 +134,7 @@ if __name__ == '__main__':
 
     # to keep freq of each character in the input file
     # read input file and calculate freq
-    freq = build_freq_dict(file_name)
+    freq = build_freq_dict(file_name, is_binary)
 
     # for each character build a huffman node and insert it
     # into the min queue
@@ -141,12 +167,9 @@ if __name__ == '__main__':
 
         # print header itself
         for key,value in code_map.items():
-            for char in "{0:04b}".format(len(value)) + "{0:08b}".format(ord(key)) +value:
+            for char in ''.join(["{0:04b}".format(len(value)),
+                                 "{0:08b}".format(ord(key) if not is_binary else key, value)]):
                 bw.append(char != '0')
-        # for line in input_file:
-        #     for c in line:
-        #         for digit in code_map[c]:
-        #             bw.append(digit != '0')
 
         print_compressed(input_file, code_map, is_binary)
 
