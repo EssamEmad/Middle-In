@@ -75,3 +75,4 @@ class BinaryWriter:
         #         self.bin_buf += '0'
         #     self._write()
         self.output_file.close()
+

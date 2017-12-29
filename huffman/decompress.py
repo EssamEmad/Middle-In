@@ -12,7 +12,7 @@ class Decompress:
 
 if __name__ == '__main__':
 
-    file_name = 'huffman/sample.zipy'
+    file_name = 'sample.em'
     with open(file_name ,"rb") as f:
         compressed = f.read()
         # str = "{0:0" + "{}".format(len(compressed) * 8) + "b}"
