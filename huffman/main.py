@@ -1,10 +1,11 @@
 from huffman_node import HuffmanNode
 from heapq import heappop, heappush
 from binary_io import BinaryWriter
+import binascii
+import struct
 import argparse
 
-
-def build_freq_dict(filename, is_binary=False):
+def build_freq_dict(filename, is_binary):
     """
     calculates freq of each character in a file and store the result in a
     dictionary
@@ -12,27 +13,10 @@ def build_freq_dict(filename, is_binary=False):
     :return: freq dictionary (character: freq)
     """
     freq = {}
-
-    mode = "rb" if is_binary else "r"
-
-    with open(filename, mode) as f:
-        if is_binary:
-            try:
-                byte = f.read(1)
-                while byte != b'':
-                    # temp = byte
-                    # byte = f.read(1)
-                    # byte = temp + byte
-                    byte = int.from_bytes(byte, byteorder="big")
-                    freq[byte] = freq[byte] + 1 if byte in freq else 1
-                    print(byte)
-                    byte = f.read(1)
-            finally:
-                pass
-        else:
-            for line in f:
-                for c in line:
-                    freq[c] = freq[c] + 1 if c in freq else 1
+    with open(filename, "rb" if is_binary else "r") as f:
+        for line in f:
+            for c in line:
+                freq[c] = freq[c] + 1 if c in freq else 1
     return freq
 
 
@@ -102,21 +86,11 @@ def tree_height(node):
 
 
 def print_compressed(input_file, code_map, is_binary=False):
-    if not is_binary:
+    # if not is_binary:
         for line in input_file:
             for c in line:
                 for digit in code_map[c]:
                     bw.append(digit != '0')
-    else:
-        try:
-            byte = input_file.read(1)
-            while byte != b'':
-                byte = int.from_bytes(byte, byteorder="big")
-                for digit in code_map[byte]:
-                    bw.append(digit != '0')
-                byte = input_file.read(1)
-        finally:
-            pass
 
 if __name__ == '__main__':
 
@@ -134,8 +108,8 @@ if __name__ == '__main__':
 
     # to keep freq of each character in the input file
     # read input file and calculate freq
-    freq = build_freq_dict(file_name, is_binary)
-
+    freq = build_freq_dict(file_name,is_binary)
+    # print("FREQUENCYDYYY dIIICT MATHAAR RUFU: {}".format(freq))
     # for each character build a huffman node and insert it
     # into the min queue
     heap = build_min_heap(freq)
@@ -161,15 +135,17 @@ if __name__ == '__main__':
         header_length_bin = "{0:012b}".format(headerlength)
         print("COMPRESSIon HEADER LENGTH: {}, binary:{}".format(headerlength,header_length_bin))
 
-        # entry_length_bin = "{0:016b}".format(header_entry_length)
         for char in header_length_bin:
             bw.append(char != '0')
 
         # print header itself
         for key,value in code_map.items():
-            for char in ''.join(["{0:04b}".format(len(value)),
-                                 "{0:08b}".format(ord(key) if not is_binary else key, value)]):
+            for char in "{0:04b}".format(len(value)) + "{0:08b}".format(key if is_binary else ord(key)) +value:
                 bw.append(char != '0')
+        # for line in input_file:
+        #     for c in line:
+        #         for digit in code_map[c]:
+        #             bw.append(digit != '0')
 
         print_compressed(input_file, code_map, is_binary)
 

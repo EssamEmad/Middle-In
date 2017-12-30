@@ -7,11 +7,12 @@ class Decompress:
     def decompress(codes, input):
         output = ""
         currentCharIndex = 0
+        print("input: {}".format(input))
         for i in range(len(input)):
             if input[currentCharIndex : i] in codes:
                 output += codes[input[currentCharIndex: i]]
                 currentCharIndex = i
-                # printf("output: {}".format(output))
+                # printx("output: {}".format(output))
 
         return output
 
