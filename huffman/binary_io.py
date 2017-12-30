@@ -17,7 +17,6 @@ class BinaryWriter:
         self.bit_count = 0
         self.bin_buf = 0
         self.bytearray = bytearray()
-        self.fereeeest = -2
 
     def append(self, bit):
         """
@@ -29,16 +28,10 @@ class BinaryWriter:
             bit = 1
         else:
             bit = 0
-        # print("bit:{}".format(bit))
         self.bin_buf <<= 1
         self.bin_buf |= bit
         self.bit_count += 1
         if self.bit_count == self.buf_size:
-            # print("Appending bin_buffer: {} bytearray is: {}\n".format(self.bin_buf,self.bytearray))
-            if self.fereeeest < 1:
-                print("FERREEEST:{} Byte: {}".format(self.fereeeest + 2,self.bin_buf))
-                self.fereeeest += 1
-
             self.bytearray.append(self.bin_buf)
             self.bit_count = 0
             self.bin_buf = 0
@@ -55,24 +48,12 @@ class BinaryWriter:
         """
         if self.bit_count  > 0:
             self.bin_buf = self.bin_buf << (8 - self.bit_count)
-            # print("bin buffer:{}".format(self.bin_buf))
             self.bytearray.append(self.bin_buf)
-        # print("Will write: {}".format(self.bytearray))
         self.output_file.write(self.bytearray)
         returnValue = 8 - self.bit_count
         self.bit_count = 0
         self.bin_buf = 0
         return returnValue
 
-    # def _write(self):
-    #     self.output_file.write(bytes([self.bin_buf]))
-    #     self.bit_count, self.bin_buf = 0, 0
-
     def close(self):
-        # if self.bit_count is not 0:
-        #     while self.bit_count % 8 != 0:
-        #         # TODO: this is terrible for performance but the deadline is come
-        #         self.bin_buf += '0'
-        #     self._write()
         self.output_file.close()
-

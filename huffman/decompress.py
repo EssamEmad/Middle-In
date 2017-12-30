@@ -7,13 +7,10 @@ class Decompress:
     def decompress(codes, input):
         output = ""
         currentCharIndex = 0
-        # print("input: {}".format(input))
         for i in range(len(input)):
             if input[currentCharIndex : i] in codes:
                 output += codes[input[currentCharIndex: i]]
                 currentCharIndex = i
-                # printx("output: {}".format(output))
-
         return output
 
     @staticmethod
@@ -42,27 +39,26 @@ if __name__ == '__main__':
     mode = "wb" if is_binary else "w"
     with open(file_name ,"rb") as f, open(output_file_name, mode) as output_file:
         compressed = f.read()
-        # str = "{0:0" + "{}".format(len(compressed) * 8) + "b}"
+        header_length_bits = 12 # 12 bits for the number of entries in the header
+        codes_bits_length = 4 # 4 bits for the length of the huffman code in each entry
+        character_bits = 8 # 8 bits for the ascii representation of the character
+        with open("test", "wb") as out:
+            out.write(compressed)
         codes = {}
-        # print("INPUT: {}".format(compressed))
         binary = ""
         for i in range(len(compressed)):
             binary += "{0:08b}".format(compressed[i])
-        # print("BINARRYYYYY: {}".format(binary))
-        headerLength = int(binary[0:12],2)
-        # print("Header length: {}".format(headerLength))
-        startIndex = 12
+        headerLength = int(binary[0:header_length_bits],2)
+        startIndex = header_length_bits
         for i in range(headerLength):
-            numberbits = int(binary[startIndex: startIndex + 4],2)
-            charStart = startIndex + 4
+            numberbits = int(binary[startIndex: startIndex + codes_bits_length],2)
+            charStart = startIndex + codes_bits_length
             if is_binary:
-                char = binary[charStart: charStart + 8]
+                char = binary[charStart: charStart + character_bits]
             else:
-                char = chr(int(binary[charStart: charStart + 8],2))
-            codes[binary[charStart + 8 : charStart + 8 + numberbits]] = char
-            startIndex = startIndex + 4+8+numberbits
-        print("Codes: {}".format(codes))
-        # print("output:{}".format(Decompress.decompress(codes, binary[startIndex:])))
+                char = chr(int(binary[charStart: charStart + character_bits],2))
+            codes[binary[charStart + character_bits : charStart + character_bits + numberbits]] = char
+            startIndex = startIndex + codes_bits_length+ character_bits +numberbits
         if is_binary:
             Decompress.print_decompressed_binary(output_file,
                                                  Decompress.decompress(codes, binary[startIndex:]))
