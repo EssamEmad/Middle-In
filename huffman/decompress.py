@@ -7,7 +7,7 @@ class Decompress:
     def decompress(codes, input):
         output = ""
         currentCharIndex = 0
-        print("input: {}".format(input))
+        # print("input: {}".format(input))
         for i in range(len(input)):
             if input[currentCharIndex : i] in codes:
                 output += codes[input[currentCharIndex: i]]
@@ -44,6 +44,7 @@ if __name__ == '__main__':
         compressed = f.read()
         # str = "{0:0" + "{}".format(len(compressed) * 8) + "b}"
         codes = {}
+        # print("INPUT: {}".format(compressed))
         binary = ""
         for i in range(len(compressed)):
             binary += "{0:08b}".format(compressed[i])

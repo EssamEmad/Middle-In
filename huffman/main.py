@@ -119,7 +119,7 @@ if __name__ == '__main__':
 
     # get variable length code for each character
     code_map = get_code_map(root)
-
+    print("OUTPUT CODE MAP:{}".format(code_map))
     # Format of header:
     # 12 binary bits for length of header, 16 bits for length of each entry then
     # length of header entries each of length length of entry
@@ -148,6 +148,5 @@ if __name__ == '__main__':
         #             bw.append(digit != '0')
 
         print_compressed(input_file, code_map, is_binary)
-
         bw.write()
         bw.close()
