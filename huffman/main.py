@@ -109,7 +109,6 @@ if __name__ == '__main__':
     # to keep freq of each character in the input file
     # read input file and calculate freq
     freq = build_freq_dict(file_name,is_binary)
-    # print("FREQUENCYDYYY dIIICT MATHAAR RUFU: {}".format(freq))
     # for each character build a huffman node and insert it
     # into the min queue
     heap = build_min_heap(freq)
@@ -119,7 +118,6 @@ if __name__ == '__main__':
 
     # get variable length code for each character
     code_map = get_code_map(root)
-
     # Format of header:
     # 12 binary bits for length of header, 16 bits for length of each entry then
     # length of header entries each of length length of entry
@@ -133,7 +131,6 @@ if __name__ == '__main__':
         bw = BinaryWriter(output_file)
 
         header_length_bin = "{0:012b}".format(headerlength)
-        print("COMPRESSIon HEADER LENGTH: {}, binary:{}".format(headerlength,header_length_bin))
 
         for char in header_length_bin:
             bw.append(char != '0')
@@ -142,12 +139,6 @@ if __name__ == '__main__':
         for key,value in code_map.items():
             for char in "{0:04b}".format(len(value)) + "{0:08b}".format(key if is_binary else ord(key)) +value:
                 bw.append(char != '0')
-        # for line in input_file:
-        #     for c in line:
-        #         for digit in code_map[c]:
-        #             bw.append(digit != '0')
-
         print_compressed(input_file, code_map, is_binary)
-
         bw.write()
         bw.close()
